@@ -31,31 +31,31 @@ func CreateTables(db *sql.DB) error {
     }
 
     _, err = db.Exec("CREATE TABLE IF NOT EXISTS " + RESPONSES_TABLE_NAME +
-        `(
-            id INT NOT NULL AUTO_INCREMENT,
-            created TIMESTAMP NOT NULL DEFAULT now(),
-            updated TIMESTAMP NOT NULL DEFAULT now() ON UPDATE now(),
-            challenge_id INT NOT NULL,
-            user_id INT NOT NULL,
-            status ENUM('open', 'accepted', 'declined', 'pending') NOT NULL,
-            picture_url varchar(100) NOT NULL,
-            PRIMARY KEY (id)
-        )`)
+    `(
+        id INT NOT NULL AUTO_INCREMENT,
+        created TIMESTAMP NOT NULL DEFAULT now(),
+        updated TIMESTAMP NOT NULL DEFAULT now() ON UPDATE now(),
+        challenge_id INT NOT NULL,
+        user_id INT NOT NULL,
+        status ENUM('open', 'accepted', 'declined') NOT NULL,
+        picture_url varchar(100) NOT NULL,
+        PRIMARY KEY (id)
+    )`)
 
     if (err != nil) {
         return err
     }
 
     _, err = db.Exec("CREATE TABLE IF NOT EXISTS " + USERS_TABLE_NAME +
-        `(
-            id INT NOT NULL AUTO_INCREMENT,
-            created TIMESTAMP NOT NULL DEFAULT now(),
-            updated TIMESTAMP NOT NULL DEFAULT now() ON UPDATE now(),
-            name varchar(100) NOT NULL,
-            google_id varchar(100) NOT NULL,
-            score INT NOT NULL DEFAULT 0,
-            PRIMARY KEY (id)
-        )`)
+    `(
+        id INT NOT NULL AUTO_INCREMENT,
+        created TIMESTAMP NOT NULL DEFAULT now(),
+        updated TIMESTAMP NOT NULL DEFAULT now() ON UPDATE now(),
+        name varchar(100) NOT NULL,
+        google_id varchar(100) NOT NULL,
+        score INT NOT NULL DEFAULT 0,
+        PRIMARY KEY (id)
+    )`)
 
     if (err != nil) {
         return err
@@ -71,16 +71,57 @@ func CreateTables(db *sql.DB) error {
     return err
 }
 
-func GetChallengesForUser(db *sql.DB, user_id string, active bool) ([]models.Challenge, error)  {
+func GetChallengesCreatedByUser(db *sql.DB, user_id string, active bool) ([]models.Challenge, error)  {
     var (
         challenge models.Challenge
         challenges []models.Challenge
     )
 
-    rows, err := db.Query("SELECT id, title, X(location), Y(location), picture_url, is_active, icon from " +
-        CHALLENGES_TABLE_NAME + " WHERE challenger_id = ?", user_id)
+    rows, err := db.Query(`
+        SELECT id, title, X(location), Y(location), picture_url, is_active, icon
+        FROM challenges
+        WHERE challenger_id = ?
+        AND is_active = ?`, user_id, active)
 
     if (err != nil) {
+        return challenges, err
+    }
+
+    for rows.Next() {
+        err = rows.Scan(
+            &challenge.Id,
+            &challenge.Title,
+            &challenge.Location.Latitude,
+            &challenge.Location.Longitude,
+            &challenge.Picture_Url,
+            &challenge.Is_Active,
+            &challenge.Icon)
+        if (err == nil) {
+            challenges = append(challenges, challenge)
+        } else {
+            return challenges, err
+        }
+    }
+
+    return challenges, err
+}
+
+func GetChallengesForUser(db *sql.DB, user_id string, active bool) ([]models.Challenge, error) {
+    var (
+        challenges []models.Challenge
+        challenge models.Challenge
+    )
+
+    rows, err := db.Query(
+        `SELECT id, title, X(location), Y(location), picture_url, is_active, icon
+        FROM challenges
+        JOIN user_challenges
+        ON user_challenges.challenge_id = challenges.id
+        WHERE user_challenges.challenged_id=?
+        AND challenges.is_active=?
+        GROUP BY challenges.id`, user_id, active)
+
+    if err != nil {
         return challenges, err
     }
 
@@ -149,5 +190,17 @@ func CreateChallenge(db *sql.DB, json models.Create_Challenge) error {
         }
     }
 
+    return err
+}
+
+func AcceptResponse(db *sql.DB, response_id string) error {
+    return UpdateResponseStatus(db, response_id, models.Accepted)
+}
+
+func UpdateResponseStatus(db *sql.DB, response_id string, status models.ResponseStatus) error {
+    _, err := db.Exec(`
+        UPDATE responses
+        SET status = ?
+        WHERE id = ?`, status.String(), response_id)
     return err
 }
