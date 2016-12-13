@@ -117,7 +117,7 @@ func GetChallengesForUser(db *sql.DB, user_id string, active bool) ([]models.Cha
         FROM challenges
         JOIN user_challenges
         ON user_challenges.challenge_id = challenges.id
-        WHERE user_challenges.challenged_id=?
+        WHERE user_challenges.challenged_id = ?
         AND challenges.is_active=?
         GROUP BY challenges.id`, user_id, active)
 
@@ -196,6 +196,11 @@ func CreateChallenge(db *sql.DB, json models.Create_Challenge) error {
 func AcceptResponse(db *sql.DB, response_id string) error {
     return UpdateResponseStatus(db, response_id, models.Accepted)
 }
+
+func DeclineResponse(db *sql.DB, response_id string) error {
+    return UpdateResponseStatus(db, response_id, models.Declined)
+}
+
 
 func UpdateResponseStatus(db *sql.DB, response_id string, status models.ResponseStatus) error {
     _, err := db.Exec(`

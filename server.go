@@ -39,10 +39,15 @@ func main() {
     r.GET("/user/:user_id/challenges", func(c *gin.Context) {
         user_id := c.Param("user_id")
 
-        result, err := database.GetChallengesForUser(db, user_id, true)
+        active := c.DefaultQuery("active", "true")
+
+        is_active, parse_err := strconv.ParseBool(active)
+
+        result, err := database.GetChallengesForUser(db, user_id, is_active)
 
         if (err != nil) {
             fmt.Print(err.Error())
+            c.Status(http.StatusInternalServerError)
         }
 
         c.JSON(http.StatusOK, result)
@@ -51,10 +56,15 @@ func main() {
     r.GET("/user/:user_id/challenges/created", func(c *gin.Context) {
         user_id := c.Param("user_id")
 
-        result, err := database.GetChallengesCreatedByUser(db, user_id, true)
+        active := c.DefaultQuery("active", "true")
+
+        is_active, parse_err := strconv.ParseBool(active)
+
+        result, err := database.GetChallengesCreatedByUser(db, user_id, is_active)
 
         if (err != nil) {
             fmt.Print(err.Error())
+            c.Status(http.StatusInternalServerError)
         }
 
         c.JSON(http.StatusOK, result)
@@ -71,8 +81,21 @@ func main() {
         } else {
             c.Done()
         }
-
     })
+
+    r.POST("/response/:response_id/decline", func (c *gin.Context) {
+        response_id := c.Param("response_id")
+
+        err := database.DeclineResponse(db, response_id)
+
+        if (err != nil) {
+            fmt.Print(err.Error())
+            c.Status(http.StatusInternalServerError)
+        } else {
+            c.Done()
+        }
+    })
+
 
     r.POST("/challenge", func(c *gin.Context) {
         var json models.Create_Challenge
