@@ -10,6 +10,13 @@ type Location struct {
     Longitude float32 `json:"long"`
 }
 
+type User struct {
+    Id int
+    Name string `json:"name" binding:"required"`
+    Google_Id string `json:"google_id" binding:"required"`
+    Score int
+}
+
 type Challenge struct {
     Id int
     Icon string
@@ -17,6 +24,15 @@ type Challenge struct {
     Location Location
     Picture_Url string
     Title string
+}
+
+type Create_Challenge struct {
+    Challenger_Id int `json:"challenger_id" binding:"required"`
+    Title string `json:"title" binding:"required"`
+    Location Location `json:"location"`
+    Picture_Url string `json:"picture_url"`
+    Icon string `json:"icon"`
+    Challenged_Ids []int `json:"challenged_ids"`
 }
 
 type ResponseStatus int64
@@ -55,23 +71,14 @@ func ResponseStringToEnum(str string) ResponseStatus {
 
 type Response struct {
     Id int
-    Challenge_Id string
-    User_Id string
+    Challenge_Id int `json:"challenge_id" binding:"required"`
+    User_Id int `json:"user_id" binding:"required"`
     Status ResponseStatus
-    Picture_Url string
+    Picture_Url string `json:"picture_url" binding:"required"`
 }
 
 type User_Challenge struct {
     Challenge_Id int
     Challenger_Id int
     Challenged_Id int
-}
-
-type Create_Challenge struct {
-    Challenger_Id int `json:"challenger_id" binding:"required"`
-    Title string `json:"title" binding:"required"`
-    Location Location `json:"location"`
-    Picture_Url string `json:"picture_url"`
-    Icon string `json:"icon"`
-    Challenged_Ids []int `json:"challenged_ids"`
 }

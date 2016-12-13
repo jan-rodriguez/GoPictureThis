@@ -5,6 +5,7 @@ import (
     "net/http"
     "gopkg.in/gin-gonic/gin.v1"
     "database/sql"
+    "strconv"
     _ "github.com/go-sql-driver/mysql"
 
     "./models"
@@ -36,12 +37,37 @@ func main() {
 
     r := gin.Default()
 
+    r.GET("/user/:user_id", func(c *gin.Context) {
+        google_id := c.Param("user_id")
+
+        user, err := database.GetUserFromGoogleId(db, google_id)
+
+        if err != nil {
+            c.Status(http.StatusInternalServerError)
+            return
+        }
+
+        c.JSON(http.StatusOK, user)
+    })
+
+    r.POST("/user/:user_id", func(c* gin.Context) {
+        var json models.User
+        if c.BindJSON(&json) == nil {
+            created_user, err := database.CreateUser(db, json)
+            if err != nil {
+                c.Status(http.StatusInternalServerError)
+            } else {
+                c.JSON(http.StatusOK, created_user)
+            }
+        }
+    })
+
     r.GET("/user/:user_id/challenges", func(c *gin.Context) {
         user_id := c.Param("user_id")
 
         active := c.DefaultQuery("active", "true")
 
-        is_active, parse_err := strconv.ParseBool(active)
+        is_active, _ := strconv.ParseBool(active)
 
         result, err := database.GetChallengesForUser(db, user_id, is_active)
 
@@ -58,7 +84,7 @@ func main() {
 
         active := c.DefaultQuery("active", "true")
 
-        is_active, parse_err := strconv.ParseBool(active)
+        is_active, _ := strconv.ParseBool(active)
 
         result, err := database.GetChallengesCreatedByUser(db, user_id, is_active)
 
@@ -100,11 +126,11 @@ func main() {
     r.POST("/challenge", func(c *gin.Context) {
         var json models.Create_Challenge
         if c.BindJSON(&json) == nil {
-            err := database.CreateChallenge(db, json)
+            challenge, err := database.CreateChallenge(db, json)
             if err != nil {
                 c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
             } else {
-                c.Done()
+                c.JSON(http.StatusOK, challenge)
             }
         } else {
             c.JSON(http.StatusUnauthorized, gin.H{"status": "Unrecognized json"})

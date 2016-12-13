@@ -144,7 +144,9 @@ func GetChallengesForUser(db *sql.DB, user_id string, active bool) ([]models.Cha
     return challenges, err
 }
 
-func CreateChallenge(db *sql.DB, json models.Create_Challenge) error {
+func CreateChallenge(db *sql.DB, json models.Create_Challenge) (models.Challenge, error) {
+    var challenge models.Challenge
+
     // Create the challenge
     res, prepareErr := db.Exec(`
         INSERT INTO ` + CHALLENGES_TABLE_NAME + `
@@ -159,10 +161,22 @@ func CreateChallenge(db *sql.DB, json models.Create_Challenge) error {
         json.Icon)
 
     if prepareErr != nil {
-        return prepareErr
+        return challenge, prepareErr
     }
 
     lastId, _ := res.LastInsertId()
+
+    challenge = models.Challenge {
+        Id: int(lastId),
+        Icon: json.Icon,
+        Is_Active: true,
+        Location: models.Location {
+            Latitude: json.Location.Latitude,
+            Longitude: json.Location.Longitude,
+        },
+        Picture_Url: json.Picture_Url,
+        Title: json.Title,
+    }
 
     // Now create all the challenges -> challenged mappings
     stmt, err := db.Prepare(`
@@ -176,7 +190,7 @@ func CreateChallenge(db *sql.DB, json models.Create_Challenge) error {
     for _, challenged_id := range json.Challenged_Ids {
 
         if err != nil {
-            return err
+            return challenge, err
         }
 
         _, err = stmt.Exec(
@@ -186,11 +200,11 @@ func CreateChallenge(db *sql.DB, json models.Create_Challenge) error {
 
         // TODO: Better error handling and rollback
         if err != nil {
-            return err
+            return challenge, err
         }
     }
 
-    return err
+    return challenge, err
 }
 
 func AcceptResponse(db *sql.DB, response_id string) error {
@@ -201,6 +215,37 @@ func DeclineResponse(db *sql.DB, response_id string) error {
     return UpdateResponseStatus(db, response_id, models.Declined)
 }
 
+func GetUserFromGoogleId(db *sql.DB, google_id string) (models.User, error) {
+    row := db.QueryRow(`
+        SELECT id, name, score
+        FROM users
+        WHERE google_id = ?`, google_id)
+
+    var user models.User
+
+    err := row.Scan(
+        &user.Id,
+        &user.Name,
+        &user.Score)
+
+    return user, err
+}
+
+func CreateUser(db *sql.DB, user_json models.User) (models.User, error) {
+    result, err := db.Exec(`
+        INSERT INTO users
+        (name, google_id)
+        VALUES (?, ?)`, user_json.Name, user_json.Google_Id)
+    last_id, err := result.LastInsertId()
+    user := models.User {
+        Id: int(last_id),
+        Name: user_json.Name,
+        Google_Id: user_json.Google_Id,
+        Score: 0,
+    }
+
+    return user, err
+}
 
 func UpdateResponseStatus(db *sql.DB, response_id string, status models.ResponseStatus) error {
     _, err := db.Exec(`
