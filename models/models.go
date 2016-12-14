@@ -11,10 +11,10 @@ type Location struct {
 }
 
 type User struct {
-    Id int
+    Id int `json:"id"`
     Name string `json:"name" binding:"required"`
     Google_Id string `json:"google_id" binding:"required"`
-    Score int
+    Score int `json:"score"`
 }
 
 type Challenge struct {

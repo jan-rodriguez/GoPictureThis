@@ -50,7 +50,7 @@ func main() {
         c.JSON(http.StatusOK, user)
     })
 
-    r.POST("/user/:user_id", func(c* gin.Context) {
+    r.POST("/user", func(c* gin.Context) {
         var json models.User
         if c.BindJSON(&json) == nil {
             created_user, err := database.CreateUser(db, json)

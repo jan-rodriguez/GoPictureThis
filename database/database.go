@@ -231,7 +231,7 @@ func GetUserFromGoogleId(db *sql.DB, google_id string) (models.User, error) {
     return user, err
 }
 
-func CreateUser(db *sql.DB, user_json models.User) (models.User, error) {
+func CreateUser(db *sql.DB, user_json models.User) (*models.User, error) {
     result, err := db.Exec(`
         INSERT INTO users
         (name, google_id)
@@ -244,7 +244,7 @@ func CreateUser(db *sql.DB, user_json models.User) (models.User, error) {
         Score: 0,
     }
 
-    return user, err
+    return &user, err
 }
 
 func UpdateResponseStatus(db *sql.DB, response_id string, status models.ResponseStatus) error {
