@@ -57,6 +57,8 @@ func main() {
             if err != nil {
                 c.Status(http.StatusInternalServerError)
             } else {
+                fmt.Print(err.Error())
+                // TODO: Handle duplicate errors better
                 c.JSON(http.StatusOK, created_user)
             }
         }

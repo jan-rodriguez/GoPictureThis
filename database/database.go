@@ -54,7 +54,8 @@ func CreateTables(db *sql.DB) error {
         name varchar(100) NOT NULL,
         google_id varchar(100) NOT NULL,
         score INT NOT NULL DEFAULT 0,
-        PRIMARY KEY (id)
+        PRIMARY KEY (id),
+        UNIQUE (google_id)
     )`)
 
     if (err != nil) {
@@ -232,12 +233,19 @@ func GetUserFromGoogleId(db *sql.DB, google_id string) (models.User, error) {
 }
 
 func CreateUser(db *sql.DB, user_json models.User) (*models.User, error) {
+    var user models.User
+
     result, err := db.Exec(`
         INSERT INTO users
         (name, google_id)
         VALUES (?, ?)`, user_json.Name, user_json.Google_Id)
+
+    if err != nil {
+        return &user, err
+    }
+
     last_id, err := result.LastInsertId()
-    user := models.User {
+    user = models.User {
         Id: int(last_id),
         Name: user_json.Name,
         Google_Id: user_json.Google_Id,
