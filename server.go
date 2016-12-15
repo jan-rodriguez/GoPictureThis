@@ -7,9 +7,11 @@ import (
     "database/sql"
     "strconv"
     _ "github.com/go-sql-driver/mysql"
+    "github.com/VividCortex/mysqlerr"
 
     "./models"
     "./database"
+    "./mysql_helper"
 )
 
 func main() {
@@ -55,7 +57,12 @@ func main() {
         if c.BindJSON(&json) == nil {
             created_user, err := database.CreateUser(db, json)
             if err != nil {
-                c.Status(http.StatusInternalServerError)
+                if mysql_helper.GetMysqlCodeForError(err) ==
+                mysqlerr.ER_DUP_ENTRY {
+                    c.Status(http.StatusConflict)
+                } else {
+                    c.Status(http.StatusInternalServerError)
+                }
             } else {
                 fmt.Print(err.Error())
                 // TODO: Handle duplicate errors better
