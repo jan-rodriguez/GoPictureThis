@@ -1,29 +1,29 @@
 package database
 
 import (
-    "database/sql"
+	"database/sql"
 )
 
 // CreateTables create all the necessary tablaes for the game
 func CreateTables(db *sql.DB) error {
 
-    err := CreateChallengeTable(db)
+	err := CreateChallengeTable(db)
 
-    if err != nil {
-        return err
-    }
+	if err != nil {
+		return err
+	}
 
-    err = CreateUsersTable(db)
+	err = CreateUsersTable(db)
 
-    if err != nil {
-        return err
-    }
+	if err != nil {
+		return err
+	}
 
-    err = CreateResponsesTable(db)
+	err = CreateResponsesTable(db)
 
-    if err != nil {
-        return err
-    }
+	if err != nil {
+		return err
+	}
 
-    return err
+	return err
 }
