@@ -1,84 +1,92 @@
 package models
 
-type Test struct {
-    Id int
-    Name string
-}
-
+// Location : Lat, Long
 type Location struct {
-    Latitude float32 `json:"lat"`
-    Longitude float32 `json:"long"`
+	Latitude  float32 `json:"lat"`
+	Longitude float32 `json:"long"`
 }
 
+// User : Stores user info
 type User struct {
-    Id int `json:"id"`
-    Name string `json:"name" binding:"required"`
-    Google_Id string `json:"google_id" binding:"required"`
-    Score int `json:"score"`
+	ID       int    `json:"id"`
+	Name     string `json:"name" binding:"required"`
+	GoogleID string `json:"GoogleID" binding:"required"`
+	Score    int    `json:"score"`
 }
 
+// Challenge challenge
 type Challenge struct {
-    Id int
-    Icon string
-    Is_Active bool
-    Location Location
-    Picture_Url string
-    Title string
+	ID         int
+	Icon       string
+	IsActive   bool
+	Location   Location
+	PictureURL string
+	Title      string
 }
 
-type Create_Challenge struct {
-    Challenger_Id int `json:"challenger_id" binding:"required"`
-    Title string `json:"title" binding:"required"`
-    Location Location `json:"location"`
-    Picture_Url string `json:"picture_url"`
-    Icon string `json:"icon"`
-    Challenged_Ids []int `json:"challenged_ids"`
+// CreateChallenge create challenge
+type CreateChallenge struct {
+	ChallengerID  int      `json:"challenger_id" binding:"required"`
+	Title         string   `json:"title" binding:"required"`
+	Location      Location `json:"location"`
+	PictureURL    string   `json:"picture_url"`
+	Icon          string   `json:"icon"`
+	ChallengedIDs []int    `json:"challenged_ids"`
 }
 
+// ResponseStatus response status
 type ResponseStatus int64
 
 const (
-    Open ResponseStatus = iota
-    Accepted
-    Declined
+	// Open : response status which has not been updated
+	Open ResponseStatus = iota
+
+	// Accepted : response which one the challenge
+	Accepted
+
+	// Declined : response that has beed declined
+	Declined
 )
 
 func (e ResponseStatus) String() string {
-    switch e {
-    case Open:
-        return "open"
-    case Accepted:
-        return "accepted"
-    case Declined:
-        return "declined"
-    }
-    // TODO: Might just want to throw error
-    return ""
+	switch e {
+	case Open:
+		return "open"
+	case Accepted:
+		return "accepted"
+	case Declined:
+		return "declined"
+	}
+	// TODO: Might just want to throw error
+	return ""
 }
 
+// ResponseStringToEnum Translate a response string to the status enum
 func ResponseStringToEnum(str string) ResponseStatus {
-    switch str {
-    case "open":
-        return Open
-    case "accepted":
-        return Accepted
-    case "declined":
-        return Declined
-    }
-    // TODO: Might just want to throw error
-    return Open
+	switch str {
+	case "open":
+		return Open
+	case "accepted":
+		return Accepted
+	case "declined":
+		return Declined
+	}
+	// TODO: Might just want to throw error
+	return Open
 }
 
+// Response response
 type Response struct {
-    Id int
-    Challenge_Id int `json:"challenge_id" binding:"required"`
-    User_Id int `json:"user_id" binding:"required"`
-    Status ResponseStatus
-    Picture_Url string `json:"picture_url" binding:"required"`
+	ID          int
+	ChallengeID int `json:"challenge_id" binding:"required"`
+	UserID      int `json:"user_id" binding:"required"`
+	Status      ResponseStatus
+	PictureURL  string `json:"picture_url" binding:"required"`
 }
 
-type User_Challenge struct {
-    Challenge_Id int
-    Challenger_Id int
-    Challenged_Id int
+// UserChallenge userchallenge
+type UserChallenge struct {
+	ChallengeID  int
+	ChallengerID int
+	ChallengedID int
 }

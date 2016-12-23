@@ -1,17 +1,18 @@
 package main
 
 import (
+    "database/sql"
     "fmt"
     "net/http"
-    "gopkg.in/gin-gonic/gin.v1"
-    "database/sql"
     "strconv"
-    _ "github.com/go-sql-driver/mysql"
-    "github.com/VividCortex/mysqlerr"
 
-    "./models"
+    "github.com/VividCortex/mysqlerr"
+    _ "github.com/go-sql-driver/mysql"
+    "gopkg.in/gin-gonic/gin.v1"
+
     "./database"
-    "./mysql_helper"
+    "./models"
+    "./mysqlhelper"
 )
 
 func main() {
@@ -40,9 +41,9 @@ func main() {
     r := gin.Default()
 
     r.GET("/user/:user_id", func(c *gin.Context) {
-        google_id := c.Param("user_id")
+        googleID := c.Param("user_id")
 
-        user, err := database.GetUserFromGoogleId(db, google_id)
+        user, err := database.GetUserFromGoogleID(db, googleID)
 
         if err != nil {
             c.Status(http.StatusInternalServerError)
@@ -52,13 +53,13 @@ func main() {
         c.JSON(http.StatusOK, user)
     })
 
-    r.POST("/user", func(c* gin.Context) {
+    r.POST("/user", func(c *gin.Context) {
         var json models.User
         if c.BindJSON(&json) == nil {
-            created_user, err := database.CreateUser(db, json)
+            createdUser, err := database.CreateUser(db, json)
             if err != nil {
-                if mysql_helper.GetMysqlCodeForError(err) ==
-                mysqlerr.ER_DUP_ENTRY {
+                if mysqlhelper.GetMysqlCodeForError(err) ==
+                    mysqlerr.ER_DUP_ENTRY {
                     c.Status(http.StatusConflict)
                 } else {
                     c.Status(http.StatusInternalServerError)
@@ -66,21 +67,21 @@ func main() {
             } else {
                 fmt.Print(err.Error())
                 // TODO: Handle duplicate errors better
-                c.JSON(http.StatusOK, created_user)
+                c.JSON(http.StatusOK, createdUser)
             }
         }
     })
 
     r.GET("/user/:user_id/challenges", func(c *gin.Context) {
-        user_id := c.Param("user_id")
+        userID := c.Param("user_id")
 
         active := c.DefaultQuery("active", "true")
 
-        is_active, _ := strconv.ParseBool(active)
+        isActive, _ := strconv.ParseBool(active)
 
-        result, err := database.GetChallengesForUser(db, user_id, is_active)
+        result, err := database.GetChallengesForUser(db, userID, isActive)
 
-        if (err != nil) {
+        if err != nil {
             fmt.Print(err.Error())
             c.Status(http.StatusInternalServerError)
         }
@@ -89,15 +90,15 @@ func main() {
     })
 
     r.GET("/user/:user_id/challenges/created", func(c *gin.Context) {
-        user_id := c.Param("user_id")
+        userID := c.Param("user_id")
 
         active := c.DefaultQuery("active", "true")
 
-        is_active, _ := strconv.ParseBool(active)
+        isActive, _ := strconv.ParseBool(active)
 
-        result, err := database.GetChallengesCreatedByUser(db, user_id, is_active)
+        result, err := database.GetChallengesCreatedByUser(db, userID, isActive)
 
-        if (err != nil) {
+        if err != nil {
             fmt.Print(err.Error())
             c.Status(http.StatusInternalServerError)
         }
@@ -105,12 +106,12 @@ func main() {
         c.JSON(http.StatusOK, result)
     })
 
-    r.POST("/response/:response_id/accept", func (c *gin.Context) {
-        response_id := c.Param("response_id")
+    r.POST("/response/:response_id/accept", func(c *gin.Context) {
+        responseID := c.Param("response_id")
 
-        err := database.AcceptResponse(db, response_id)
+        err := database.AcceptResponse(db, responseID)
 
-        if (err != nil) {
+        if err != nil {
             fmt.Print(err.Error())
             c.Status(http.StatusInternalServerError)
         } else {
@@ -118,22 +119,21 @@ func main() {
         }
     })
 
-    r.POST("/response/:response_id/decline", func (c *gin.Context) {
-        response_id := c.Param("response_id")
+    r.POST("/response/:response_id/decline", func(c *gin.Context) {
+        responseID := c.Param("response_id")
 
-        err := database.DeclineResponse(db, response_id)
+        err := database.DeclineResponse(db, responseID)
 
-        if (err != nil) {
+        if err != nil {
             fmt.Print(err.Error())
             c.Status(http.StatusInternalServerError)
         } else {
             c.Done()
         }
     })
-
 
     r.POST("/challenge", func(c *gin.Context) {
-        var json models.Create_Challenge
+        var json models.CreateChallenge
         if c.BindJSON(&json) == nil {
             challenge, err := database.CreateChallenge(db, json)
             if err != nil {

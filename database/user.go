@@ -2,14 +2,17 @@ package database
 
 import (
     "database/sql"
+
     "../models/"
 )
 
-const USERS_TABLE_NAME = "users"
+// UsersTableName for users table
+const UsersTableName = "users"
 
+// CreateUsersTable : Creates user table if it doesn't exist
 func CreateUsersTable(db *sql.DB) error {
-    _, err := db.Exec("CREATE TABLE IF NOT EXISTS " + USERS_TABLE_NAME +
-    `(
+    _, err := db.Exec("CREATE TABLE IF NOT EXISTS " + UsersTableName +
+        `(
         id INT NOT NULL AUTO_INCREMENT,
         created TIMESTAMP NOT NULL DEFAULT now(),
         updated TIMESTAMP NOT NULL DEFAULT now() ON UPDATE now(),
@@ -23,40 +26,44 @@ func CreateUsersTable(db *sql.DB) error {
     return err
 }
 
-func GetUserFromGoogleId(db *sql.DB, google_id string) (models.User, error) {
+// GetUserFromGoogleID : Gets user from google id
+func GetUserFromGoogleID(db *sql.DB, googleID string) (models.User, error) {
     row := db.QueryRow(`
         SELECT id, name, score
         FROM users
-        WHERE google_id = ?`, google_id)
+        WHERE google_id = ?`, googleID)
 
     var user models.User
 
     err := row.Scan(
-        &user.Id,
+        &user.ID,
         &user.Name,
         &user.Score)
+
+    user.GoogleID = googleID
 
     return user, err
 }
 
-func CreateUser(db *sql.DB, user_json models.User) (*models.User, error) {
+// CreateUser : Creates user
+func CreateUser(db *sql.DB, userJSON models.User) (*models.User, error) {
     var user models.User
 
     result, err := db.Exec(`
         INSERT INTO users
         (name, google_id)
-        VALUES (?, ?)`, user_json.Name, user_json.Google_Id)
+        VALUES (?, ?)`, userJSON.Name, userJSON.GoogleID)
 
     if err != nil {
         return &user, err
     }
 
-    last_id, err := result.LastInsertId()
-    user = models.User {
-        Id: int(last_id),
-        Name: user_json.Name,
-        Google_Id: user_json.Google_Id,
-        Score: 0,
+    lastID, err := result.LastInsertId()
+    user = models.User{
+        ID:       int(lastID),
+        Name:     userJSON.Name,
+        GoogleID: userJSON.GoogleID,
+        Score:    0,
     }
 
     return &user, err
