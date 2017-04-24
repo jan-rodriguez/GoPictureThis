@@ -3,7 +3,9 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/VividCortex/mysqlerr"
@@ -17,16 +19,16 @@ import (
 
 func main() {
 
-	db, connectError := sql.Open("mysql", "root:neveragain@tcp(127.0.0.1:3306)/test")
+	db, connectError := sql.Open("mysql", "root:241neveragain@tcp(127.0.0.1:3306)/test")
 
 	if connectError != nil {
-		fmt.Print(connectError.Error())
+		fmt.Println(connectError.Error())
 	}
 
 	createError := database.CreateTables(db)
 
 	if createError != nil {
-		fmt.Print(createError.Error())
+		fmt.Println(createError.Error())
 	}
 
 	defer db.Close()
@@ -35,7 +37,8 @@ func main() {
 	err := db.Ping()
 
 	if err != nil {
-		fmt.Print(err.Error())
+		fmt.Println(err.Error())
+		return
 	}
 
 	r := gin.Default()
@@ -65,7 +68,6 @@ func main() {
 					c.Status(http.StatusInternalServerError)
 				}
 			} else {
-				fmt.Print(err.Error())
 				// TODO: Handle duplicate errors better
 				c.JSON(http.StatusOK, createdUser)
 			}
@@ -112,7 +114,7 @@ func main() {
 		err := database.AcceptResponse(db, responseID)
 
 		if err != nil {
-			fmt.Print(err.Error())
+			fmt.Println(err.Error())
 			c.Status(http.StatusInternalServerError)
 		} else {
 			c.Done()
@@ -144,6 +146,31 @@ func main() {
 		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{"status": "Unrecognized json"})
 		}
+	})
+
+	r.POST("/image", func(c *gin.Context) {
+		file, header, err := c.Request.FormFile("upload")
+		filename := header.Filename
+		fmt.Println(header.Filename)
+		out, err := os.Create("./tmp/" + filename)
+		defer out.Close()
+		if err != nil {
+			fmt.Println(err.Error())
+			c.String(http.StatusInternalServerError, "Failed at creating file")
+			return
+		}
+		_, err = io.Copy(out, file)
+		if err != nil {
+			fmt.Println(err.Error())
+			c.String(http.StatusInternalServerError, "Failed copying file")
+			return
+		}
+
+		response := models.ImageCreatedResponse {
+			Location: 
+		}
+
+		c.JSON(http.StatusOK, obj)
 	})
 
 	r.Run(":8080") // listen and serve on 0.0.0.0:8080

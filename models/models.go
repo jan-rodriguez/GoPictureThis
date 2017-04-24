@@ -90,3 +90,7 @@ type UserChallenge struct {
 	ChallengerID int
 	ChallengedID int
 }
+
+type ImageCreatedResponse struct {
+	Location string `json:"location" binding:"required"`
+}
