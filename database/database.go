@@ -1,29 +1,29 @@
 package database
 
 import (
-	"database/sql"
+	"github.com/jinzhu/gorm"
 )
 
 // CreateTables create all the necessary tablaes for the game
-func CreateTables(db *sql.DB) error {
+func CreateTables(db *gorm.DB) {
 
-	err := CreateChallengeTable(db)
+	CreateChallengeTable(db)
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
 
-	err = CreateUsersTable(db)
+	// }
+	// err = CreateUsersTable(db)
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 
-	err = CreateResponsesTable(db)
+	// err = CreateResponsesTable(db)
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 
-	return err
+	// return err
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"io"
 	"net/http"
@@ -9,7 +8,11 @@ import (
 	"strconv"
 
 	"github.com/VividCortex/mysqlerr"
-	_ "github.com/go-sql-driver/mysql"
+	// _ "github.com/go-sql-driver/mysql"
+
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+
 	"gopkg.in/gin-gonic/gin.v1"
 
 	"./database"
@@ -19,27 +22,28 @@ import (
 
 func main() {
 
-	db, connectError := sql.Open("mysql", "root:241neveragain@tcp(127.0.0.1:3306)/test")
+	username := os.Getenv("PICTURE_THIS_DB_USER")
+	password := os.Getenv("PICTURE_THIS_DB_PASS")
+	dbname := "test"
 
-	if connectError != nil {
-		fmt.Println(connectError.Error())
-	}
-
-	createError := database.CreateTables(db)
-
-	if createError != nil {
-		fmt.Println(createError.Error())
-	}
+	db, connectError := gorm.Open("mysql", username+":"+password+"@/"+dbname+"?charset=utf8&parseTime=True&loc=Local")
 
 	defer db.Close()
 
-	// make sure connection is available
-	err := db.Ping()
-
-	if err != nil {
-		fmt.Println(err.Error())
+	if connectError != nil {
+		fmt.Println(connectError.Error())
 		return
 	}
+
+	database.CreateTables(db)
+
+	// make sure connection is available
+	// err := db.Ping()
+
+	// if err != nil {
+	// 	fmt.Println(err.Error())
+	// 	return
+	// }
 
 	r := gin.Default()
 
@@ -111,27 +115,27 @@ func main() {
 	r.POST("/response/:response_id/accept", func(c *gin.Context) {
 		responseID := c.Param("response_id")
 
-		err := database.AcceptResponse(db, responseID)
+		database.AcceptResponse(db, responseID)
 
-		if err != nil {
-			fmt.Println(err.Error())
-			c.Status(http.StatusInternalServerError)
-		} else {
-			c.Done()
-		}
+		// if err != nil {
+		// 	fmt.Println(err.Error())
+		// 	c.Status(http.StatusInternalServerError)
+		// } else {
+		c.Done()
+		// }
 	})
 
 	r.POST("/response/:response_id/decline", func(c *gin.Context) {
 		responseID := c.Param("response_id")
 
-		err := database.DeclineResponse(db, responseID)
+		database.DeclineResponse(db, responseID)
 
-		if err != nil {
-			fmt.Print(err.Error())
-			c.Status(http.StatusInternalServerError)
-		} else {
-			c.Done()
-		}
+		// if err != nil {
+		// 	fmt.Print(err.Error())
+		// 	c.Status(http.StatusInternalServerError)
+		// } else {
+		c.Done()
+		// }
 	})
 
 	r.POST("/challenge", func(c *gin.Context) {
@@ -166,11 +170,7 @@ func main() {
 			return
 		}
 
-		response := models.ImageCreatedResponse {
-			Location: 
-		}
-
-		c.JSON(http.StatusOK, obj)
+		c.Status(http.StatusOK)
 	})
 
 	r.Run(":8080") // listen and serve on 0.0.0.0:8080

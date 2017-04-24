@@ -2,8 +2,8 @@ package models
 
 // Location : Lat, Long
 type Location struct {
-	Latitude  float32 `json:"lat"`
-	Longitude float32 `json:"long"`
+	Latitude  float64 `json:"lat"`
+	Longitude float64 `json:"long"`
 }
 
 // User : Stores user info
@@ -26,12 +26,12 @@ type Challenge struct {
 
 // CreateChallenge create challenge
 type CreateChallenge struct {
-	ChallengerID  int      `json:"challenger_id" binding:"required"`
-	Title         string   `json:"title" binding:"required"`
-	Location      Location `json:"location"`
-	PictureURL    string   `json:"picture_url"`
-	Icon          string   `json:"icon"`
-	ChallengedIDs []int    `json:"challenged_ids"`
+	ChallengerID int         `json:"challenger_id" binding:"required"`
+	Title        string      `json:"title" binding:"required"`
+	Location     Location    `json:"location"`
+	PictureURL   string      `json:"picture_url"`
+	Icon         string      `json:"icon"`
+	Challenges   []Challenge `json:"challenged_ids gorm:"many2many:challenged_table;"`
 }
 
 // ResponseStatus response status
@@ -92,5 +92,5 @@ type UserChallenge struct {
 }
 
 type ImageCreatedResponse struct {
-	Location string `json:"location" binding:"required"`
+	Location Location `json:"location" binding:"required"`
 }
