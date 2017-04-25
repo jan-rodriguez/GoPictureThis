@@ -10,28 +10,31 @@ type Location struct {
 type User struct {
 	ID       int    `json:"id"`
 	Name     string `json:"name" binding:"required"`
-	GoogleID string `json:"GoogleID" binding:"required"`
+	GoogleID string `json:"GoogleID" binding:"required" gorm:"unique"`
 	Score    int    `json:"score"`
 }
 
 // Challenge challenge
 type Challenge struct {
-	ID         int
-	Icon       string
-	IsActive   bool
-	Location   Location
-	PictureURL string
-	Title      string
+	ID           int
+	Icon         string
+	IsActive     bool
+	Latitude     float64
+	Longitude    float64
+	PictureURL   string
+	Title        string
+	ChallengerID int
 }
 
 // CreateChallenge create challenge
 type CreateChallenge struct {
-	ChallengerID int         `json:"challenger_id" binding:"required"`
-	Title        string      `json:"title" binding:"required"`
-	Location     Location    `json:"location"`
-	PictureURL   string      `json:"picture_url"`
-	Icon         string      `json:"icon"`
-	Challenges   []Challenge `json:"challenged_ids gorm:"many2many:challenged_table;"`
+	ChallengerID  int     `json:"challenger_id" binding:"required"`
+	Title         string  `json:"title" binding:"required"`
+	Latitude      float64 `json:"lat"`
+	Longitude     float64 `json:"long"`
+	PictureURL    string  `json:"picture_url"`
+	Icon          string  `json:"icon"`
+	ChallengedIDs []int   `json:"challenged_ids" gorm:"-"`
 }
 
 // ResponseStatus response status
@@ -88,7 +91,7 @@ type Response struct {
 type UserChallenge struct {
 	ChallengeID  int
 	ChallengerID int
-	ChallengedID int
+	ChallengedID int `gorm:`
 }
 
 type ImageCreatedResponse struct {

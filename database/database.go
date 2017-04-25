@@ -8,22 +8,6 @@ import (
 func CreateTables(db *gorm.DB) {
 
 	CreateChallengeTable(db)
-
-	// if err != nil {
-	// 	return err
-
-	// }
-	// err = CreateUsersTable(db)
-
-	// if err != nil {
-	// 	return err
-	// }
-
-	// err = CreateResponsesTable(db)
-
-	// if err != nil {
-	// 	return err
-	// }
-
-	// return err
+	CreateUsersTable(db)
+	CreateResponsesTable(db)
 }

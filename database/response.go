@@ -11,7 +11,9 @@ const ResponsesTableName = "responses"
 
 // CreateResponsesTable exactly what it says
 func CreateResponsesTable(db *gorm.DB) {
-	db.CreateTable(&models.Response{})
+	if (!db.HasTable(&models.Response{})) {
+		db.CreateTable(&models.Response{})
+	}
 }
 
 // AcceptResponse accepts response

@@ -37,14 +37,6 @@ func main() {
 
 	database.CreateTables(db)
 
-	// make sure connection is available
-	// err := db.Ping()
-
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// 	return
-	// }
-
 	r := gin.Default()
 
 	r.GET("/user/:user_id", func(c *gin.Context) {
