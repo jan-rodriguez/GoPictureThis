@@ -34,7 +34,7 @@ type CreateChallenge struct {
 	Longitude     float64 `json:"long"`
 	PictureURL    string  `json:"picture_url"`
 	Icon          string  `json:"icon"`
-	ChallengedIDs []int   `json:"challenged_ids" gorm:"-"`
+	ChallengedIDs []int   `json:"challenged_ids"`
 }
 
 // ResponseStatus response status
@@ -81,7 +81,7 @@ func ResponseStringToEnum(str string) ResponseStatus {
 // Response response
 type Response struct {
 	ID          int
-	ChallengeID int `json:"challenge_id" binding:"required"`
+	ChallengeID int `json:"challenge_id"`
 	UserID      int `json:"user_id" binding:"required"`
 	Status      ResponseStatus
 	PictureURL  string `json:"picture_url" binding:"required"`
@@ -91,7 +91,7 @@ type Response struct {
 type UserChallenge struct {
 	ChallengeID  int
 	ChallengerID int
-	ChallengedID int `gorm:`
+	ChallengedID int
 }
 
 type ImageCreatedResponse struct {

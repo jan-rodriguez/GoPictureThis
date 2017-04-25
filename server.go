@@ -8,7 +8,6 @@ import (
 	"strconv"
 
 	"github.com/VividCortex/mysqlerr"
-	// _ "github.com/go-sql-driver/mysql"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -104,43 +103,44 @@ func main() {
 		c.JSON(http.StatusOK, result)
 	})
 
-	r.POST("/response/:response_id/accept", func(c *gin.Context) {
-		responseID := c.Param("response_id")
+	r.POST("/challenge/:challenge_id/response", func(c *gin.Context) {
 
-		database.AcceptResponse(db, responseID)
+		var response models.Response
+		if c.BindJSON(&response) == nil {
+			challengeId, err := strconv.ParseInt(c.Param("challenge_id"), 10, 0)
 
-		// if err != nil {
-		// 	fmt.Println(err.Error())
-		// 	c.Status(http.StatusInternalServerError)
-		// } else {
-		c.Done()
-		// }
-	})
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
 
-	r.POST("/response/:response_id/decline", func(c *gin.Context) {
-		responseID := c.Param("response_id")
-
-		database.DeclineResponse(db, responseID)
-
-		// if err != nil {
-		// 	fmt.Print(err.Error())
-		// 	c.Status(http.StatusInternalServerError)
-		// } else {
-		c.Done()
-		// }
-	})
-
-	r.POST("/challenge", func(c *gin.Context) {
-		var json models.CreateChallenge
-		if c.BindJSON(&json) == nil {
-			challenge, err := database.CreateChallenge(db, json)
+			response.ChallengeID = int(challengeId)
+			updatedResponse, err := database.CreateResponse(db, response)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			} else {
-				c.JSON(http.StatusOK, challenge)
+				c.JSON(http.StatusOK, updatedResponse)
 			}
+		}
+	})
+
+	r.POST("/response/:response_id/accept", func(c *gin.Context) {
+
+		updatedResponse, err := database.AcceptResponse(db, c.Param("response_id"))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		} else {
-			c.JSON(http.StatusUnauthorized, gin.H{"status": "Unrecognized json"})
+			c.JSON(http.StatusOK, updatedResponse)
+		}
+	})
+
+	r.POST("/response/:response_id/decline", func(c *gin.Context) {
+
+		updatedResponse, err := database.DeclineResponse(db, c.Param("response_id"))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		} else {
+			c.JSON(http.StatusOK, updatedResponse)
 		}
 	})
 
