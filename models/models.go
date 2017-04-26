@@ -10,7 +10,7 @@ type Location struct {
 type User struct {
 	ID       int    `json:"id"`
 	Name     string `json:"name" binding:"required"`
-	GoogleID string `json:"GoogleID" binding:"required" gorm:"unique"`
+	GoogleID string `json:"google_id" binding:"required" gorm:"unique"`
 	Score    int    `json:"score"`
 }
 
