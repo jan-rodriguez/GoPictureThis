@@ -27,6 +27,11 @@ func GetUserFromGoogleID(db *gorm.DB, googleID string) (models.User, error) {
 
 // CreateUser : Creates user
 func CreateUser(db *gorm.DB, userJSON models.User) (*models.User, error) {
-	err := db.Create(&userJSON).Error
+	existingUser, err := GetUserFromGoogleID(db, userJSON.GoogleID)
+	// Already have existing user, just return that
+	if existingUser.ID != 0 {
+		return &existingUser, err
+	}
+	err = db.Create(&userJSON).Error
 	return &userJSON, err
 }
