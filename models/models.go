@@ -19,6 +19,7 @@ type Challenge struct {
 	ID           int
 	Icon         string
 	IsActive     bool
+	IsGlobal     bool
 	Latitude     float64
 	Longitude    float64
 	PictureURL   string
