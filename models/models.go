@@ -35,6 +35,7 @@ type CreateChallenge struct {
 	Longitude     float64 `json:"long" binding:"required"`
 	PictureURL    string  `json:"picture_url" binding:"required"`
 	Icon          string  `json:"icon"`
+	IsGlobal      bool    `json:"is_global" binding:"required"`
 	ChallengedIDs []int   `json:"challenged_ids binding:"required"`
 }
 
