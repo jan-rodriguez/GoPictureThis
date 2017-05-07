@@ -54,8 +54,8 @@ func CreateChallenge(db *gorm.DB, createChallenge models.CreateChallenge) (model
 	challenge = models.Challenge{
 		Icon:         createChallenge.Icon,
 		IsActive:     true,
-		Latitude:     createChallenge.Latitude,
-		Longitude:    createChallenge.Longitude,
+		Latitude:     *createChallenge.Latitude,
+		Longitude:    *createChallenge.Longitude,
 		PictureURL:   createChallenge.PictureURL,
 		Title:        createChallenge.Title,
 		IsGlobal: 	  createChallenge.IsGlobal,

@@ -19,8 +19,8 @@ type Challenge struct {
 	Icon         string
 	IsActive     bool
 	IsGlobal     bool
-	Latitude     float64
-	Longitude    float64
+	Latitude     float32
+	Longitude    float32
 	PictureURL   string
 	Title        string
 	ChallengerID string
@@ -29,12 +29,12 @@ type Challenge struct {
 // CreateChallenge create challenge
 type CreateChallenge struct {
 	ChallengerID  string     `json:"challenger_id" binding:"required"`
-	Title         string  `json:"title" binding:"required"`
-	Latitude      float64 `json:"lat" binding:"required"`
-	Longitude     float64 `json:"long" binding:"required"`
-	PictureURL    string  `json:"picture_url" binding:"required"`
-	Icon          string  `json:"icon"`
-	IsGlobal      bool    `json:"is_global" binding:"required"`
+	Title         string  	 `json:"title" binding:"required"`
+	Latitude      *float32   `json:"lat" binding:"exists"`
+	Longitude     *float32	 `json:"long" binding:"exists"`
+	PictureURL    string  	 `json:"picture_url" binding:"required"`
+	Icon          string  	 `json:"icon"`
+	IsGlobal      bool     	 `json:"is_global" binding:"required"`
 	ChallengedIDs []string   `json:"challenged_ids`
 }
 

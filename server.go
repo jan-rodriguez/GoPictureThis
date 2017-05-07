@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	_ "io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -108,11 +109,13 @@ func main() {
 	})
 
 	r.POST("/challenge", func(c *gin.Context) {
+
 		var createChallenge models.CreateChallenge
-		if c.BindJSON(&createChallenge) != nil {
+		if c.BindJSON(&createChallenge) == nil {
 			challenge, err := database.CreateChallenge(db, createChallenge)
 			if err != nil  {
 				utils.SendErrorResponse(c, err)
+				return
 			} else {
 				c.JSON(http.StatusOK, challenge)
 			}
@@ -164,8 +167,7 @@ func main() {
 	})
 
 	r.POST("/image", func(c *gin.Context) {
-		file, header, err := c.Request.FormFile("upload")
-		fmt.Println(header.Filename)
+		file, _, err := c.Request.FormFile("upload")
 
 		// Create images dir if it doesn't exist
 		if _, err := os.Stat("images"); os.IsNotExist(err) {
