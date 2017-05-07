@@ -107,6 +107,18 @@ func main() {
 		c.JSON(http.StatusOK, result)
 	})
 
+	r.POST("/challenge", func(c *gin.Context) {
+		var createChallenge models.CreateChallenge
+		if c.BindJSON(&createChallenge) != nil {
+			challenge, err := database.CreateChallenge(db, createChallenge)
+			if err != nil  {
+				utils.SendErrorResponse(c, err)
+			} else {
+				c.JSON(http.StatusOK, challenge)
+			}
+		}
+	})
+
 	r.POST("/challenge/:challenge_id/response", func(c *gin.Context) {
 
 		var response models.Response

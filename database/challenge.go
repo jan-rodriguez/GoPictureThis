@@ -58,6 +58,7 @@ func CreateChallenge(db *gorm.DB, createChallenge models.CreateChallenge) (model
 		Longitude:    createChallenge.Longitude,
 		PictureURL:   createChallenge.PictureURL,
 		Title:        createChallenge.Title,
+		IsGlobal: 	  createChallenge.IsGlobal,
 		ChallengerID: createChallenge.ChallengerID,
 	}
 
